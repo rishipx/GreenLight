@@ -1,0 +1,8 @@
+from fastapi import APIRouter
+
+router = APIRouter(tags=["health"])
+
+
+@router.get("/health")
+def health() -> dict:
+    return {"status": "healthy", "service": "greenlight", "worker_model": "database-backed"}

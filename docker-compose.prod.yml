@@ -1,0 +1,42 @@
+# Production overlay: terminates TLS in Caddy and stops publishing the API port.
+# Requires Docker Compose v2.24+ (uses the !reset tag).
+#   GREENLIGHT_DOMAIN=greenlight.example.com \
+#     docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+services:
+  postgres:
+    restart: unless-stopped
+  api:
+    ports: !reset []
+    environment:
+      APP_ENV: production
+      # Trust X-Forwarded-For only from Caddy so rate limiting sees real client IPs.
+      FORWARDED_ALLOW_IPS: 172.28.0.10
+    restart: unless-stopped
+  worker:
+    restart: unless-stopped
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      GREENLIGHT_DOMAIN: ${GREENLIGHT_DOMAIN:?set GREENLIGHT_DOMAIN}
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      edge:
+        ipv4_address: 172.28.0.10
+    restart: unless-stopped
+    depends_on: [api]
+
+networks:
+  edge:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+
+volumes:
+  caddy_data:
+  caddy_config:

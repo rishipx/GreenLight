@@ -1,0 +1,24 @@
+[Unit]
+Description=GreenLight Linux journal incident watcher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=GREENLIGHT_URL=https://greenlight.example.com
+Environment=GREENLIGHT_SERVICE_NAME=my-service
+Environment=GREENLIGHT_JOURNAL_UNIT=my-service.service
+EnvironmentFile=/etc/greenlight/agent.env
+ExecStart=/opt/greenlight/agents/journal/greenlight-journal.sh
+Restart=on-failure
+RestartSec=5
+DynamicUser=yes
+SupplementaryGroups=systemd-journal
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/var/log/journal /run/log/journal
+
+[Install]
+WantedBy=multi-user.target

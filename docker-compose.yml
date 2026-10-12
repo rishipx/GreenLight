@@ -1,0 +1,92 @@
+# Local stack: PostgreSQL, API and remediation worker.
+# Production: add docker-compose.prod.yml (see docs/deployment.md).
+x-database-url: &database-url postgresql+psycopg://greenlight:${POSTGRES_PASSWORD:-greenlight}@postgres:5432/greenlight
+
+x-hardening: &hardening
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: greenlight
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-greenlight}
+      POSTGRES_DB: greenlight
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greenlight -d greenlight"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    <<: *hardening
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: *database-url
+      REMEDIATION_MODE: ${REMEDIATION_MODE:-dry-run}
+      REMEDIATION_TIMEOUT_SECONDS: ${REMEDIATION_TIMEOUT_SECONDS:-15}
+      TELEGRAM_ADMIN_IDS: ${TELEGRAM_ADMIN_IDS:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+      INGEST_API_KEY: ${INGEST_API_KEY:-}
+      READ_API_KEY: ${READ_API_KEY:-}
+      AGENT_WEBHOOK_SECRET: ${AGENT_WEBHOOK_SECRET:-}
+      ALERTMANAGER_WEBHOOK_SECRET: ${ALERTMANAGER_WEBHOOK_SECRET:-}
+      GENERIC_WEBHOOK_SECRET: ${GENERIC_WEBHOOK_SECRET:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.groq.com/openai/v1}
+      LLM_MODEL: ${LLM_MODEL:-llama-3.3-70b-versatile}
+      LLM_REDACTION_ENABLED: ${LLM_REDACTION_ENABLED:-true}
+      LLM_REDACT_REQUEST_BODIES: ${LLM_REDACT_REQUEST_BODIES:-true}
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-}
+      APPROVAL_TTL_SECONDS: ${APPROVAL_TTL_SECONDS:-300}
+      MAX_REQUEST_BYTES: ${MAX_REQUEST_BYTES:-65536}
+      RATE_LIMIT_REQUESTS: ${RATE_LIMIT_REQUESTS:-30}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
+      DEDUPE_WINDOW_SECONDS: ${DEDUPE_WINDOW_SECONDS:-300}
+    ports: ["127.0.0.1:8000:8000"]
+    networks: [edge, internal]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  worker:
+    build: .
+    <<: *hardening
+    command: ["python", "-m", "greenlight.worker"]
+    environment:
+      DATABASE_URL: *database-url
+      REMEDIATION_MODE: ${REMEDIATION_MODE:-dry-run}
+      REMEDIATION_TIMEOUT_SECONDS: ${REMEDIATION_TIMEOUT_SECONDS:-15}
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-}
+      WORKER_POLL_SECONDS: ${WORKER_POLL_SECONDS:-1.0}
+      WORKER_LEASE_SECONDS: ${WORKER_LEASE_SECONDS:-60}
+      WORKER_MAX_ATTEMPTS: ${WORKER_MAX_ATTEMPTS:-3}
+    networks: [internal]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 0.50
+
+networks:
+  edge:
+  internal:
+    internal: true
+
+volumes:
+  pgdata:
