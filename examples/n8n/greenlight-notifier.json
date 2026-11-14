@@ -1,0 +1,57 @@
+{
+  "name": "GreenLight completion notifier",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "greenlight",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "6f0c8f9e-2a3b-4c5d-8e7f-1a2b3c4d5e6f",
+      "name": "GreenLight webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "b7d1e0a4-5c2f-4e8a-9d3b-0f6a7c8e9d10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hooks.slack.com/services/REPLACE_ME",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: 'GreenLight: ' + $json.body.service + ' [' + $json.body.severity + '] ' + $json.body.action + ' (incident ' + $json.body.incident_id + ', approved by ' + $json.body.resolved_by_admin + ')' }) }}",
+        "options": {}
+      },
+      "id": "3a9b7c1d-6e4f-4a2b-b8c0-d5e6f7a8b9c1",
+      "name": "Post to Slack or Discord",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        280,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "GreenLight webhook": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack or Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
