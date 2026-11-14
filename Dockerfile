@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.15-slim
 
 LABEL org.opencontainers.image.title="GreenLight" \
       org.opencontainers.image.description="AI-assisted incident triage with human-approved, allowlisted remediation" \
