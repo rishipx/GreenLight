@@ -1,7 +1,7 @@
 """Request, response and triage schemas."""
 
 import re
-from enum import Enum
+from enum import StrEnum
 from ipaddress import ip_address
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 HOST_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,252}")
 
 
-class Severity(str, Enum):
+class Severity(StrEnum):
     P0 = "P0"
     P1 = "P1"
     P2 = "P2"
