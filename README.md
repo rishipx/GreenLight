@@ -164,13 +164,7 @@ The suite covers approval races, token expiry, the allowlist, the redaction filt
 
 ## Documentation
 
-| Document | Covers |
-| --- | --- |
-| [Architecture](docs/architecture.md) | Approval, worker recovery, data model |
-| [Security](docs/security.md) | Risks, controls, data sent to the LLM |
-| [Configuration](docs/configuration.md) | Every environment variable |
-| [Integrations](docs/integrations.md) | Journal agent, Alertmanager, Telegram, n8n |
-| [Deployment](docs/deployment.md) | Docker Compose, TLS, production checklist |
+[Architecture](docs/architecture.md) · [Configuration](docs/configuration.md) · [Integrations](docs/integrations.md) · [Deployment](docs/deployment.md) · [Security](docs/security.md)
 
 ## License
 
