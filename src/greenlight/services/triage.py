@@ -38,7 +38,7 @@ def sanitize_diagnosis(diagnosis: TriageDiagnosis) -> TriageDiagnosis:
                 "remediation_key": None,
                 "confidence_score": 0.0,
                 "suggested_fix": (
-                    "Model proposed a remediation outside the approved runbook set. " "Manual investigation required."
+                    "Model proposed a remediation outside the approved runbook set. Manual investigation required."
                 ),
             }
         )
