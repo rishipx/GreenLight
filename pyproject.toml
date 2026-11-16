@@ -18,21 +18,21 @@ classifiers = [
   "Topic :: System :: Systems Administration",
 ]
 dependencies = [
-  "fastapi==0.162.4",
-  "uvicorn[standard]==0.34.0",
-  "pydantic==2.10.4",
-  "pydantic-settings==2.7.1",
-  "sqlalchemy==2.0.36",
-  "psycopg[binary]==3.3.8",
+  "fastapi==0.162.5",
+  "uvicorn[standard]==0.54.0",
+  "pydantic==2.14.3",
+  "pydantic-settings==2.16.3",
+  "sqlalchemy==2.1.8",
+  "psycopg[binary]==3.3.9",
   "httpx==0.28.1",
-  "openai==1.59.7",
+  "openai==1.109.1",
 ]
 
 [project.optional-dependencies]
 dev = [
   "pytest==9.2.0",
   "pytest-cov==7.1.0",
-  "ruff==0.8.4",
+  "ruff==0.17.5",
 ]
 
 [project.scripts]
