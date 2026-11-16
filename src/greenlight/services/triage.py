@@ -10,6 +10,8 @@ from greenlight.services.runbooks import RUNBOOKS
 
 logger = logging.getLogger("greenlight.triage")
 
+UNKNOWN_KEY_FIX = "Model proposed a remediation outside the approved runbook set. Manual investigation required."
+
 SYSTEM_PROMPT = (
     "You triage production incidents from log excerpts. Return only JSON with root_cause, "
     "severity (P0/P1/P2), suggested_fix, remediation_key, confidence_score. "
@@ -37,9 +39,7 @@ def sanitize_diagnosis(diagnosis: TriageDiagnosis) -> TriageDiagnosis:
             update={
                 "remediation_key": None,
                 "confidence_score": 0.0,
-                "suggested_fix": (
-                    "Model proposed a remediation outside the approved runbook set. Manual investigation required."
-                ),
+                "suggested_fix": UNKNOWN_KEY_FIX,
             }
         )
     return diagnosis
